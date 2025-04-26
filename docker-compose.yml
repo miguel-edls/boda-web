@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: boda_web
+    expose:
+      - "8000"
+    networks:
+      - boda_net
+
+  nginx:
+    image: nginx:latest
+    container_name: boda_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
+    networks:
+      - boda_net
+
+networks:
+  boda_net:
+    driver: bridge

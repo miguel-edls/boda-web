@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Irene & Miguel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href='https://fonts.googleapis.com/css?family=Baskervville' rel='stylesheet'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+
+    
+
+    body {
+        font-family: 'Amsterdam';
+        background-color: #F7F5F2;
+        color: #3b372e;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6">
+
+  <!-- Header -->
+  <header class="text-center mb-8">
+    <h1 class="text-5xl mb-4">
+        <img src="static/img/irene_miguel.png" alt="Logo" class="w-96 mx-auto mb-4">
+    </h1>
+    <p class="text-xl">¡Bienvenidos a la web de nuestra boda!</p>
+  </header>
+
+  <!-- Formulario -->
+  <section class="w-full max-w-2xl mb-12 bg-white p-8 rounded-lg shadow">
+
+    <form id="contactForm" class="space-y-4">
+      <input type="text" name="nombre" placeholder="Nombre" class="w-full p-3 border rounded" required />
+
+      <input type="number" name="personas" placeholder="¿Cuántas personas sois?" class="w-full p-3 border rounded" required />
+
+      <label class="block">
+        ¿Usarás el autobús de ida?
+        <select name="bus_ida" class="w-full p-3 border rounded mt-1">
+          <option value="No">No</option>
+          <option value="Sí">Sí</option>
+        </select>
+      </label>
+
+      <label class="block">
+        ¿Usarás el autobús de vuelta?
+        <select name="bus_vuelta" class="w-full p-3 border rounded mt-1">
+            <option value="No">No</option>
+            <option value="Sí">Sí</option>
+        </select>
+      </label>
+
+      <div id="horaMarchaContainer" class="hidden">
+        <label class="block mt-4">
+          ¿A qué hora tienes pensado marcharte?
+          <select name="hora_marcha" id="horaMarcha" class="w-full p-3 border rounded mt-1">
+            <option value="20:00">20:00</option>
+            <option value="00:00">00:00</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="block mt-4">
+        ¿Tenéis alguna alergia alimentaria?
+        <select name="alergia" id="alergiaSelect" class="w-full p-3 border rounded mt-1">
+          <option value="No">No</option>
+          <option value="Sí">Sí</option>
+        </select>
+      </label>
+      
+      <div id="detalleAlergiaContainer" class="hidden">
+        <label class="block mt-4">
+          Nombre y tipo de alergia:
+          <textarea name="detalle_alergia" class="w-full p-3 border rounded mt-1"></textarea>
+        </label>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded font-bold hover:bg-blue-600">Enviar</button>
+    </form>
+  </section>
+
+  <!-- Descargas -->
+  <section class="w-full max-w-2xl bg-white p-8 rounded-lg shadow">
+    <h2 class="text-2xl font-bold mb-6 text-center">Información turística</h2>
+    <ul class="list-disc list-inside space-y-2">
+      {% for pdf in pdfs %}
+        <li>
+          <a href="{{ url_for('download_file', filename=pdf) }}" class="text-blue-700 underline" download>{{ pdf }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const busVueltaSelect = document.querySelector('select[name="bus_vuelta"]');
+        const horaMarchaContainer = document.getElementById('horaMarchaContainer');
+    
+        const alergiaSelect = document.getElementById('alergiaSelect');
+        const detalleAlergiaContainer = document.getElementById('detalleAlergiaContainer');
+    
+        busVueltaSelect.addEventListener('change', function() {
+          if (this.value === 'Sí') {
+            horaMarchaContainer.classList.remove('hidden');
+          } else {
+            horaMarchaContainer.classList.add('hidden');
+          }
+        });
+    
+        alergiaSelect.addEventListener('change', function() {
+          if (this.value === 'Sí') {
+            detalleAlergiaContainer.classList.remove('hidden');
+          } else {
+            detalleAlergiaContainer.classList.add('hidden');
+          }
+        });
+    
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const formData = new FormData(this);
+          const data = Object.fromEntries(formData.entries());
+    
+          try {
+            const res = await fetch("/submit", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            });
+    
+            if (res.ok) {
+              alert("Formulario enviado con éxito.");
+              this.reset();
+              horaMarchaContainer.classList.add('hidden');
+              detalleAlergiaContainer.classList.add('hidden');
+            } else {
+              alert("Hubo un error al enviar el formulario.");
+            }
+          } catch (err) {
+            alert("Fallo en la conexión: " + err.message);
+          }
+        });
+      });
+  </script>
+
+</body>
+</html>

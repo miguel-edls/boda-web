@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scroll Picker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      transition: background-color 0.3s ease;
+      border-color: #3b372e;
+    }
+    .scroll-container {
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      height: 100%;
+    }
+    .scroll-item {
+      scroll-snap-align: center;
+      transition: transform 0.3s, opacity 0.3s;
+      background-color: transparent !important;
+      color: inherit !important;
+    }
+    .view-screen {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      transition: left 0.3s ease;
+      z-index: 10;
+      overflow-y: auto;
+    }
+    .view-screen.active {
+      left: 0;
+    }
+    .logo-text {
+      font-family: 'Amsterdam';
+    }
+    #scrollList {
+        border-width: 6px;
+        border-style: dotted;
+        border-top: none;
+        border-bottom: none;
+        width: 80%;
+        margin-bottom: 10%;
+        margin-top: 10%;
+    }
+  </style>
+</head>
+<body class="relative">
+  <div class="flex flex-col items-center h-full w-full" id="mainScreen">
+    <!-- Logo -->
+    <div class="w-full text-center py-8">
+      <h1 class="logo-text text-2xl">Irene&amp;Miguel</h1>
+    </div>
+
+    <!-- Scroll List -->
+    <div class="sidebar"></div>
+    <div id="scrollList" class="scroll-container flex-1 flex flex-col items-center">
+        
+    </div>
+    <div class="sidebar"></div>
+  </div>
+
+  <!-- View Screens -->
+  <div id="redView" class="view-screen">
+    <div class="p-4">
+      <button onclick="goBack()" class="text-white bg-black px-3 py-1 rounded mb-4">Back</button>
+      <h1 class="text-3xl font-bold text-red-500 mb-4">Red Section</h1>
+      <p class="mb-2">This is a description about the red section.</p>
+      <!--
+      <img src="https://via.placeholder.com/300x150?text=Red+Image" class="mb-4" />
+      <img src="https://via.placeholder.com/300x150?text=More+Images" />
+      -->
+    </div>
+  </div>
+  <div id="blueView" class="view-screen">
+    <div class="p-4">
+      <button onclick="goBack()" class="bg-black px-3 py-1 rounded mb-4">Back</button>
+      <h1 class="text-3xl font-bold text-blue-500 mb-4">Blue Form</h1>
+      <form id="contactForm" class="space-y-4">
+        <input type="text" name="nombre" placeholder="Nombre" class="w-full p-2 border rounded" required />
+      
+        <input type="number" name="personas" placeholder="¿Cuántas personas sois?" class="w-full p-2 border rounded" required />
+      
+        <label class="block">
+          ¿Usarás el autobús de ida?
+          <select name="bus_ida" class="w-full p-2 border rounded">
+            <option value="Sí">Sí</option>
+            <option value="No">No</option>
+          </select>
+        </label>
+      
+        <label class="block">
+          ¿Usarás el autobús de vuelta?
+          <select name="bus_vuelta" class="w-full p-2 border rounded">
+            <option value="Sí">Sí</option>
+            <option value="No">No</option>
+          </select>
+        </label>
+      
+        <input type="text" name="hora_marcha" placeholder="¿A qué hora tienes pensado marcharte?" class="w-full p-2 border rounded" required />
+      
+        <label class="block">
+          ¿Tenéis alguna alergia alimentaria?
+          <select name="alergia" class="w-full p-2 border rounded">
+            <option value="No">No</option>
+            <option value="Sí">Sí</option>
+          </select>
+        </label>
+      
+        <textarea name="detalle_alergia" placeholder="Nombre y tipo de alergia (si aplica)" class="w-full p-2 border rounded"></textarea>
+      
+        <button type="submit" class="bg-blue-500 px-4 py-2 rounded text-white">Enviar</button>
+      </form>
+      
+    </div>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const formData = new FormData(this);
+          const data = Object.fromEntries(formData.entries());
+      
+          try {
+            const res = await fetch('http://localhost:5000/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+      
+            if (res.ok) {
+              alert('Form submitted!');
+              this.reset();
+            } else {
+              const err = await res.json();
+              alert('Error: ' + (err.error || 'Unknown error'));
+            }
+          } catch (err) {
+            alert('Request failed: ' + err.message);
+          }
+        });
+      </script>
+  </div>
+  <div id="greenView" class="view-screen">
+    <div class="p-4">
+      <button onclick="goBack()" class="bg-black px-3 py-1 rounded mb-4">Back</button>
+      <h1 class="text-3xl font-bold text-green-500 mb-4">Green Downloads</h1>
+      <p class="mb-2">Download useful documents below:</p>
+      <ul class="list-disc ml-6">
+        <li><a href="#" class="text-green-700 underline">Document 1 (PDF)</a></li>
+        <li><a href="#" class="text-green-700 underline">Document 2 (PDF)</a></li>
+        <li><a href="#" class="text-green-700 underline">Document 3 (PDF)</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const scrollList = document.getElementById("scrollList");
+    const itemData = [
+      { color: "#F7F5F2", text: "#3b372e", label: "El Evento", viewId: "redView" },
+      { color: "#E5D4C2", text: "#3b372e", label: "Turismo", viewId: "blueView" },
+      { color: "#EBEAAB", text: "#3b372e", label: "Asistencia", viewId: "greenView" },
+      { color: "#859C83", text: "#F7F5F2", label: "Otros", viewId: null },
+    ];
+
+    const repeatCount = 50;
+    for (let i = 0; i < repeatCount; i++) {
+      itemData.forEach(({ color, text, label, viewId }) => {
+        const div = document.createElement("div");
+        div.className = "scroll-item text-2xl font-bold py-12 w-full text-center cursor-pointer";
+        div.dataset.color = color;
+        div.dataset.text = text;
+        if (viewId) div.dataset.view = viewId;
+        div.textContent = label;
+        scrollList.appendChild(div);
+      });
+    }
+
+    const items = scrollList.querySelectorAll(".scroll-item");
+    let currentBg = "#ffffff";
+
+    function updateStyles() {
+      const center = window.innerHeight / 2;
+      let closestItem = null;
+      let closestDistance = Infinity;
+
+      items.forEach((item) => {
+        const rect = item.getBoundingClientRect();
+        const itemCenter = rect.top + rect.height / 2;
+        const distance = Math.abs(center - itemCenter);
+
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestItem = item;
+        }
+      });
+
+      items.forEach((item) => {
+        if (item === closestItem) {
+          item.style.opacity = 1;
+          item.style.transform = "scale(1)";
+          document.body.style.backgroundColor = item.dataset.color;
+          document.body.style.color = item.dataset.text;
+          document.getElementById("scrollList").style.borderColor = item.dataset.text;
+          console.log(item.dataset.text);
+          currentBg = item.dataset.color;
+        } else {
+          item.style.opacity = 0.5;
+          item.style.transform = "scale(0.8)";
+        }
+      });
+    }
+
+    scrollList.addEventListener("scroll", () => {
+      requestAnimationFrame(updateStyles);
+    });
+
+    items.forEach(item => {
+      item.addEventListener("click", () => {
+        const viewId = item.dataset.view;
+        if (viewId) {
+          const view = document.getElementById(viewId);
+          view.style.backgroundColor = currentBg;
+          view.classList.add("active");
+        }
+      });
+    });
+
+    function goBack() {
+      document.querySelectorAll(".view-screen.active").forEach(view => {
+        view.classList.remove("active");
+      });
+    }
+
+    window.addEventListener("load", () => {
+      const itemHeight = items[0].offsetHeight;
+      const middleIndex = Math.floor((items.length * itemHeight) / 2);
+      scrollList.scrollTop = middleIndex - window.innerHeight / 2;
+      updateStyles();
+    });
+  </script>
+</body>
+</html>
